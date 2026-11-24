@@ -1,0 +1,38 @@
+{
+  "schema": {
+    "entity": "hotel_booking",
+    "locale": "en_IN",
+    "fields": {
+      "booking_id": {"type": "integer", "unique": true, "generator": "sequence", "min": 1000001},
+      "booking_ref": {"type": "string", "unique": true, "pattern": "HB[A-Z0-9]{8}"},
+      "guest_name": {"type": "string", "generator": "faker", "faker_method": "name"},
+      "guest_email": {"type": "string", "generator": "email"},
+      "guest_phone": {"type": "string", "pattern": "[6-9]\\d{9}"},
+      "hotel_city": {"type": "string", "generator": "geo_city"},
+      "hotel_category": {"type": "string", "allowed_values": ["budget", "3_star", "4_star", "5_star"],
+                         "weights": [30, 34, 24, 12]},
+      "room_type": {"type": "string", "allowed_values": ["standard", "deluxe", "suite"], "weights": [58, 34, 8]},
+      "nightly_rate_inr": {"type": "integer", "generator": "profile", "depends_on": "hotel_category",
+                           "profile": {"budget": {"min": 900, "typical": 1800, "max": 3500},
+                                       "3_star": {"min": 2500, "typical": 4200, "max": 7500},
+                                       "4_star": {"min": 5000, "typical": 7800, "max": 14000},
+                                       "5_star": {"min": 9000, "typical": 16000, "max": 45000}}},
+      "check_in": {"type": "date", "min": "2025-01-01", "max": "2026-03-31"},
+      "check_out": {"type": "date", "depends_on": "check_in", "offset_days": [1, 10]},
+      "booked_on": {"type": "date", "depends_on": "check_in", "offset_days": [-120, -1]},
+      "guests": {"type": "integer", "allowed_values": [1, 2, 3, 4], "weights": [24, 52, 14, 10]},
+      "booking_channel": {"type": "string", "allowed_values": ["direct_website", "ota", "travel_agent", "corporate", "walk_in"],
+                          "weights": [22, 50, 10, 12, 6]},
+      "status": {"type": "string", "allowed_values": ["confirmed", "checked_out", "cancelled", "no_show"],
+                 "weights": [30, 55, 12, 3]},
+      "breakfast_included": {"type": "boolean", "allowed_values": [true, false], "weights": [46, 54]}
+    },
+    "rules": [
+      {"name": "stay_order", "expression": "booked_on < check_in < check_out",
+       "description": "A booking is made before check-in, and check-out follows check-in."}
+    ]
+  },
+  "total_records": 10000,
+  "output_format": "csv",
+  "generation_instructions": "Hotel reservations across Indian cities."
+}

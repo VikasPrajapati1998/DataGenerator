@@ -1,0 +1,42 @@
+{
+  "schema": {
+    "entity": "vehicle",
+    "locale": "en_IN",
+    "fields": {
+      "vehicle_id": {"type": "integer", "unique": true, "generator": "sequence", "min": 100001},
+      "vin": {"type": "string", "unique": true, "pattern": "MA[1-9A-HJ-NPR-Z][A-HJ-NPR-Z0-9]{14}"},
+      "registration_no": {"type": "string", "unique": true,
+                          "pattern": "(MH|DL|KA|TN|GJ|UP|WB|TS|RJ|KL)\\d{2}[A-Z]{2}\\d{4}"},
+      "make": {"type": "string", "allowed_values": ["Maruti Suzuki", "Hyundai", "Tata", "Mahindra", "Toyota", "Kia", "Honda"],
+               "weights": [41, 15, 14, 11, 6, 7, 6]},
+      "segment": {"type": "string", "allowed_values": ["hatchback", "sedan", "suv", "mpv"], "weights": [38, 14, 40, 8]},
+      "fuel_type": {"type": "string", "allowed_values": ["petrol", "diesel", "cng", "electric"], "weights": [58, 22, 15, 5]},
+      "transmission": {"type": "string", "allowed_values": ["manual", "automatic"], "weights": [68, 32]},
+      "manufacture_date": {"type": "date", "min": "2012-01-01", "max": "2025-03-31"},
+      "purchase_date": {"type": "date", "depends_on": "manufacture_date", "offset_days": [15, 180]},
+      "last_service_date": {"type": "date", "depends_on": "purchase_date", "offset_days": [30, 1500], "max": "2025-11-15"},
+      "ex_showroom_price_inr": {"type": "integer", "generator": "profile", "depends_on": "segment",
+                                "profile": {
+                                  "hatchback": {"min": 450000, "typical": 650000, "max": 950000},
+                                  "sedan": {"min": 750000, "typical": 1100000, "max": 1900000},
+                                  "suv": {"min": 800000, "typical": 1500000, "max": 3500000},
+                                  "mpv": {"min": 900000, "typical": 1350000, "max": 2800000}}},
+      "odometer_km": {"type": "integer", "min": 300, "max": 240000,
+                      "distribution": {"kind": "triangular", "mode": 42000}},
+      "owner_name": {"type": "string", "generator": "faker", "faker_method": "name"},
+      "owner_phone": {"type": "string", "pattern": "[6-9]\\d{9}"},
+      "state": {"type": "string", "generator": "geo_state"},
+      "city": {"type": "string", "generator": "geo_city"},
+      "insurance_active": {"type": "boolean", "allowed_values": [true, false], "weights": [86, 14]}
+    },
+    "rules": [
+      {"name": "purchase_after_manufacture", "expression": "purchase_date > manufacture_date",
+       "description": "A vehicle is sold after it is manufactured."},
+      {"name": "service_after_purchase", "expression": "last_service_date >= purchase_date",
+       "description": "The last service happens after purchase."}
+    ]
+  },
+  "total_records": 5000,
+  "output_format": "csv",
+  "generation_instructions": "Registered passenger vehicles in India."
+}

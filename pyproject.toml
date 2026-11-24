@@ -1,0 +1,23 @@
+[project]
+name = "synthetic-data-engine"
+version = "1.0.0"
+description = "Intelligent dynamic parallel synthetic data generation engine (LangGraph + Ollama)"
+requires-python = ">=3.11"
+readme = "README.md"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-m \"not slow and not cloud\" -p no:cacheprovider"
+markers = [
+    "slow: large end-to-end runs (100k+ records); run with -m slow",
+    "ollama: needs a local Ollama server with the test model (auto-skipped otherwise)",
+    "cloud: needs OLLAMA_API_KEY and SDE_RUN_CLOUD_TESTS=1",
+]
+filterwarnings = ["ignore::DeprecationWarning:faker.*"]
+
+[tool.pylint.format]
+max-line-length = 120
+
+[tool.ruff]
+line-length = 120

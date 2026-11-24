@@ -1,0 +1,36 @@
+{
+  "schema": {
+    "entity": "customer",
+    "fields": {
+      "customer_id": {"type": "string", "generator": "uuid", "unique": true},
+      "full_name": {"type": "string", "generator": "faker", "faker_method": "name"},
+      "email": {"type": "string", "generator": "email", "unique": true},
+      "phone": {"type": "string", "generator": "faker", "faker_method": "phone_number"},
+      "city": {"type": "string", "generator": "geo_city"},
+      "segment": {"type": "string", "allowed_values": ["student", "professional", "retiree", "small_business"],
+                  "weights": [20, 50, 15, 15]},
+      "age": {"type": "integer", "generator": "profile", "depends_on": "segment",
+              "profile": {"student": {"min": 18, "max": 30, "typical": 21},
+                          "professional": {"min": 23, "max": 62, "typical": 35},
+                          "retiree": {"min": 58, "max": 85, "typical": 66},
+                          "small_business": {"min": 25, "max": 70, "typical": 42}}},
+      "annual_income": {"type": "integer", "generator": "profile", "depends_on": "segment",
+                        "correlate_with": {"field": "age", "strength": 0.3}},
+      "loyalty_member": {"type": "boolean"},
+      "interests": {"type": "string", "generator": "llm", "max_length": 200,
+                    "instructions": "Comma-separated list of 3-5 specific hobbies or shopping interests plausible for the segment and age."},
+      "bio": {"type": "string", "generator": "llm", "max_length": 300,
+              "instructions": "Two sentences describing the customer's shopping behaviour, consistent with segment, age and income."}
+    },
+    "rules": [
+      {"name": "students_are_young", "expression": "age <= 35 if segment == 'student' else True",
+       "description": "Students are 35 or younger."},
+      {"name": "retirees_are_older", "expression": "age >= 55 if segment == 'retiree' else True",
+       "description": "Retirees are at least 55."}
+    ]
+  },
+  "total_records": 500,
+  "output_format": "json",
+  "generation_instructions": "Customers of an Indian consumer-electronics retailer; incomes in INR.",
+  "quality_requirements": {"max_regeneration_rounds": 6}
+}

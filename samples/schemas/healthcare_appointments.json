@@ -1,0 +1,37 @@
+{
+  "schema": {
+    "entity": "appointment",
+    "locale": "en_IN",
+    "fields": {
+      "appointment_id": {"type": "integer", "unique": true, "generator": "sequence", "min": 700001},
+      "patient_mrn": {"type": "string", "pattern": "MRN\\d{12}"},
+      "department": {"type": "string",
+                     "allowed_values": ["general_medicine", "paediatrics", "orthopaedics", "cardiology",
+                                        "gynaecology", "dermatology", "ent", "ophthalmology"],
+                     "weights": [28, 12, 12, 9, 11, 10, 9, 9]},
+      "doctor_name": {"type": "string", "generator": "faker", "faker_method": "name"},
+      "visit_type": {"type": "string", "allowed_values": ["new", "follow_up", "teleconsult"], "weights": [46, 42, 12]},
+      "follow_up_of": {"type": "integer", "generator": "reference", "reference": "appointment_id",
+                       "nullable": true, "null_ratio": 0.6},
+      "appointment_date": {"type": "date", "min": "2025-01-01", "max": "2025-12-31"},
+      "slot_time": {"type": "string", "pattern": "(09|10|11|12|14|15|16|17):(00|15|30|45)"},
+      "wait_minutes": {"type": "integer", "min": 0, "max": 150, "distribution": {"kind": "triangular", "mode": 18}},
+      "consultation_fee_inr": {"type": "integer", "generator": "profile", "depends_on": "department",
+                               "profile": {
+                                 "general_medicine": {"min": 300, "typical": 500, "max": 900},
+                                 "paediatrics": {"min": 400, "typical": 650, "max": 1100},
+                                 "orthopaedics": {"min": 500, "typical": 800, "max": 1500},
+                                 "cardiology": {"min": 700, "typical": 1100, "max": 2000},
+                                 "gynaecology": {"min": 500, "typical": 800, "max": 1500},
+                                 "dermatology": {"min": 400, "typical": 700, "max": 1300},
+                                 "ent": {"min": 400, "typical": 650, "max": 1100},
+                                 "ophthalmology": {"min": 350, "typical": 600, "max": 1100}}},
+      "status": {"type": "string", "allowed_values": ["completed", "no_show", "cancelled", "rescheduled"],
+                 "weights": [78, 9, 8, 5]},
+      "hospital_city": {"type": "string", "generator": "geo_city"}
+    }
+  },
+  "total_records": 5000,
+  "output_format": "csv",
+  "generation_instructions": "Outpatient appointments at Indian hospitals."
+}

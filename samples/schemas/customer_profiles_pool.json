@@ -1,0 +1,21 @@
+{
+  "schema": {
+    "customer_id": "unique integer",
+    "name": "realistic full name",
+    "email": "valid email",
+    "city": "Indian city",
+    "segment": ["student", "professional", "retiree", "small_business"],
+    "bio": "two-sentence description of the customer's shopping habits, consistent with the segment"
+  },
+  "total_records": 400,
+  "output_format": "csv",
+  "generation_instructions": "Customers of an Indian consumer-electronics retailer.",
+  "model_pool": [
+    "ollama_local/qwen3:0.6b",
+    "ollama_local/llama3.2:1b",
+    "ollama_local/gemma3:1b",
+    "ollama_local/gpt-oss:120b-cloud"
+  ],
+  "model_assignment": "round_robin",
+  "quality_requirements": {"max_regeneration_rounds": 6}
+}

@@ -1,0 +1,43 @@
+{
+  "schema": {
+    "entity": "shipment",
+    "locale": "en_IN",
+    "fields": {
+      "shipment_id": {"type": "integer", "unique": true, "generator": "sequence", "min": 1},
+      "awb_no": {"type": "string", "unique": true, "pattern": "(AW|DL|BD|XB)\\d{11}"},
+      "origin_city": {"type": "string", "generator": "geo_city"},
+      "destination_city": {"type": "string", "generator": "geo_city"},
+      "service_level": {"type": "string", "allowed_values": ["surface", "express", "same_day"], "weights": [55, 38, 7]},
+      "category": {"type": "string", "allowed_values": ["documents", "apparel", "electronics", "groceries", "furniture", "pharma"],
+                   "weights": [14, 26, 20, 14, 8, 18]},
+      "weight_kg": {"type": "float", "generator": "profile", "depends_on": "category", "decimals": 2,
+                    "profile": {"documents": {"min": 0.05, "typical": 0.3, "max": 2},
+                                "apparel": {"min": 0.2, "typical": 0.9, "max": 8},
+                                "electronics": {"min": 0.3, "typical": 2.5, "max": 40},
+                                "groceries": {"min": 0.5, "typical": 4, "max": 25},
+                                "furniture": {"min": 5, "typical": 28, "max": 120},
+                                "pharma": {"min": 0.1, "typical": 0.8, "max": 12}}},
+      "declared_value_inr": {"type": "integer", "generator": "profile", "depends_on": "category",
+                             "profile": {"documents": {"min": 0, "typical": 100, "max": 2000},
+                                         "apparel": {"min": 300, "typical": 1800, "max": 15000},
+                                         "electronics": {"min": 1000, "typical": 15000, "max": 200000},
+                                         "groceries": {"min": 200, "typical": 1500, "max": 9000},
+                                         "furniture": {"min": 3000, "typical": 18000, "max": 150000},
+                                         "pharma": {"min": 150, "typical": 1200, "max": 30000}}},
+      "pickup_date": {"type": "date", "min": "2025-01-01", "max": "2025-11-10"},
+      "promised_date": {"type": "date", "depends_on": "pickup_date", "offset_days": [1, 6]},
+      "carrier": {"type": "string", "allowed_values": ["Delhivery", "Blue Dart", "Ecom Express", "DTDC", "XpressBees", "India Post"],
+                  "weights": [26, 16, 14, 16, 18, 10]},
+      "cash_on_delivery": {"type": "boolean", "allowed_values": [true, false], "weights": [38, 62]},
+      "status": {"type": "string", "allowed_values": ["delivered", "in_transit", "out_for_delivery", "rto", "lost"],
+                 "weights": [80, 10, 5, 4.5, 0.5]}
+    },
+    "rules": [
+      {"name": "promise_after_pickup", "expression": "promised_date > pickup_date",
+       "description": "The promised delivery date is after pickup."}
+    ]
+  },
+  "total_records": 10000,
+  "output_format": "csv",
+  "generation_instructions": "E-commerce parcel shipments within India."
+}

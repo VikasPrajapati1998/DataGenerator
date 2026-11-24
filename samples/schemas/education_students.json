@@ -1,0 +1,41 @@
+{
+  "schema": {
+    "entity": "student",
+    "locale": "en_IN",
+    "fields": {
+      "student_id": {"type": "integer", "unique": true, "generator": "sequence", "min": 2025001},
+      "roll_no": {"type": "string", "unique": true, "pattern": "(CSE|ECE|MEC|CIV|EEE|ITE)\\d{2}[A-Z]{2}\\d{6}"},
+      "full_name": {"type": "string", "generator": "faker", "faker_method": "name"},
+      "email": {"type": "string", "generator": "email", "unique": true},
+      "gender": {"type": "string", "allowed_values": ["male", "female"], "weights": [55, 45]},
+      "date_of_birth": {"type": "date", "min": "2001-01-01", "max": "2008-06-30"},
+      "program": {"type": "string", "allowed_values": ["B.Tech", "B.Sc", "B.Com", "BA", "BBA", "M.Tech", "MBA"],
+                  "weights": [30, 16, 16, 12, 10, 6, 10]},
+      "admission_year": {"type": "integer", "min": 2019, "max": 2025},
+      "annual_fee_inr": {"type": "integer", "generator": "profile", "depends_on": "program",
+                         "profile": {
+                           "B.Tech": {"min": 90000, "typical": 180000, "max": 450000},
+                           "B.Sc": {"min": 25000, "typical": 60000, "max": 160000},
+                           "B.Com": {"min": 20000, "typical": 50000, "max": 140000},
+                           "BA": {"min": 12000, "typical": 35000, "max": 110000},
+                           "BBA": {"min": 50000, "typical": 120000, "max": 300000},
+                           "M.Tech": {"min": 80000, "typical": 160000, "max": 350000},
+                           "MBA": {"min": 150000, "typical": 600000, "max": 1800000}}},
+      "cgpa": {"type": "float", "min": 4.0, "max": 10.0, "decimals": 2,
+               "distribution": {"kind": "normal", "mean": 7.4, "std": 1.0}},
+      "attendance_pct": {"type": "float", "min": 45, "max": 100, "decimals": 1,
+                         "distribution": {"kind": "normal", "mean": 82, "std": 9}},
+      "scholarship": {"type": "boolean", "allowed_values": [true, false], "weights": [22, 78]},
+      "hostel_resident": {"type": "boolean", "allowed_values": [true, false], "weights": [41, 59]},
+      "state": {"type": "string", "generator": "geo_state"},
+      "city": {"type": "string", "generator": "geo_city"}
+    },
+    "rules": [
+      {"name": "admitted_at_least_16", "expression": "years_between(date_of_birth, '2025-07-01') >= 16",
+       "description": "Students are at least 16 years old."}
+    ]
+  },
+  "total_records": 5000,
+  "output_format": "csv",
+  "generation_instructions": "Students enrolled at an Indian university."
+}

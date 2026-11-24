@@ -1,0 +1,47 @@
+{
+  "schema": {
+    "entity": "insurance_claim",
+    "locale": "en_IN",
+    "fields": {
+      "claim_id": {"type": "integer", "unique": true, "generator": "sequence", "min": 300001},
+      "policy_no": {"type": "string", "unique": true, "pattern": "POL\\d{12}"},
+      "insured_name": {"type": "string", "generator": "faker", "faker_method": "name"},
+      "insured_age": {"type": "integer", "min": 18, "max": 80, "distribution": {"kind": "normal", "mean": 42, "std": 13}},
+      "policy_type": {"type": "string", "allowed_values": ["health", "motor", "life", "home", "travel"],
+                      "weights": [44, 34, 6, 6, 10]},
+      "sum_insured_inr": {"type": "integer", "generator": "profile", "depends_on": "policy_type",
+                          "profile": {
+                            "health": {"min": 300000, "typical": 500000, "max": 2500000},
+                            "motor": {"min": 200000, "typical": 600000, "max": 3000000},
+                            "life": {"min": 2500000, "typical": 10000000, "max": 50000000},
+                            "home": {"min": 1000000, "typical": 3000000, "max": 15000000},
+                            "travel": {"min": 100000, "typical": 500000, "max": 3000000}}},
+      "claim_amount_inr": {"type": "integer", "generator": "profile", "depends_on": "policy_type",
+                           "profile": {
+                             "health": {"min": 5000, "typical": 65000, "max": 290000},
+                             "motor": {"min": 3000, "typical": 45000, "max": 190000},
+                             "life": {"min": 500000, "typical": 1500000, "max": 2400000},
+                             "home": {"min": 20000, "typical": 150000, "max": 900000},
+                             "travel": {"min": 2000, "typical": 25000, "max": 95000}}},
+      "incident_date": {"type": "date", "min": "2024-01-01", "max": "2025-09-30"},
+      "claim_date": {"type": "date", "depends_on": "incident_date", "offset_days": [1, 45]},
+      "decision_date": {"type": "date", "depends_on": "claim_date", "offset_days": [5, 75]},
+      "claim_status": {"type": "string", "allowed_values": ["settled", "approved", "under_review", "rejected"],
+                       "weights": [62, 12, 14, 12]},
+      "fraud_flag": {"type": "boolean", "allowed_values": [true, false], "weights": [3, 97]},
+      "state": {"type": "string", "generator": "geo_state"},
+      "city": {"type": "string", "generator": "geo_city"},
+      "claim_description": {"type": "string", "generator": "llm", "max_length": 240,
+                            "instructions": "One or two sentences describing the incident behind the claim, consistent with the policy type and claim amount."}
+    },
+    "rules": [
+      {"name": "claim_within_cover", "expression": "claim_amount_inr <= sum_insured_inr",
+       "description": "The claimed amount never exceeds the sum insured."},
+      {"name": "dates_in_order", "expression": "incident_date < claim_date < decision_date",
+       "description": "Incident, claim and decision dates are in chronological order."}
+    ]
+  },
+  "total_records": 500,
+  "output_format": "csv",
+  "generation_instructions": "General and life insurance claims filed with an Indian insurer."
+}

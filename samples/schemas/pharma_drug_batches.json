@@ -1,0 +1,44 @@
+{
+  "schema": {
+    "entity": "drug_batch",
+    "locale": "en_IN",
+    "fields": {
+      "batch_id": {"type": "integer", "unique": true, "generator": "sequence", "min": 10001},
+      "batch_no": {"type": "string", "unique": true, "pattern": "B[A-Z]{3}\\d{8}"},
+      "product": {"type": "string",
+                  "description": "drug, strength and dosage form",
+                  "allowed_values": ["Paracetamol 650 mg tablet", "Amoxicillin 500 mg capsule", "Metformin 500 mg tablet",
+                                     "Atorvastatin 10 mg tablet", "Azithromycin 200 mg/5 ml syrup",
+                                     "Pantoprazole 40 mg injection", "Cetirizine 5 mg/5 ml syrup",
+                                     "Amlodipine 5 mg tablet"],
+                  "weights": [20, 12, 16, 12, 9, 8, 9, 14]},
+      "manufacturer": {"type": "string", "generator": "faker", "faker_method": "company"},
+      "plant_state": {"type": "string", "generator": "geo_state"},
+      "manufacture_date": {"type": "date", "min": "2023-01-01", "max": "2025-10-31"},
+      "expiry_date": {"type": "date", "depends_on": "manufacture_date", "offset_days": [540, 1095]},
+      "quantity_units": {"type": "integer", "min": 5000, "max": 200000,
+                         "distribution": {"kind": "triangular", "mode": 40000}},
+      "mrp_per_unit_inr": {"type": "float", "generator": "profile", "depends_on": "product", "decimals": 2,
+                           "description": "price per tablet/capsule, per bottle for syrups, per vial for injections",
+                           "profile": {
+                             "Paracetamol 650 mg tablet": {"min": 1.0, "typical": 2.0, "max": 4.0},
+                             "Amoxicillin 500 mg capsule": {"min": 4.0, "typical": 7.5, "max": 14.0},
+                             "Metformin 500 mg tablet": {"min": 1.0, "typical": 2.2, "max": 5.0},
+                             "Atorvastatin 10 mg tablet": {"min": 3.0, "typical": 6.5, "max": 15.0},
+                             "Azithromycin 200 mg/5 ml syrup": {"min": 45.0, "typical": 85.0, "max": 160.0},
+                             "Pantoprazole 40 mg injection": {"min": 35.0, "typical": 60.0, "max": 120.0},
+                             "Cetirizine 5 mg/5 ml syrup": {"min": 35.0, "typical": 55.0, "max": 110.0},
+                             "Amlodipine 5 mg tablet": {"min": 1.2, "typical": 2.8, "max": 6.0}}},
+      "storage_temp_c": {"type": "float", "min": 2, "max": 30, "decimals": 1,
+                         "distribution": {"kind": "normal", "mean": 24, "std": 3}},
+      "qc_status": {"type": "string", "allowed_values": ["passed", "quarantine", "rejected"], "weights": [92, 5, 3]}
+    },
+    "rules": [
+      {"name": "expiry_after_manufacture", "expression": "days_between(manufacture_date, expiry_date) >= 540",
+       "description": "Shelf life is at least 18 months."}
+    ]
+  },
+  "total_records": 5000,
+  "output_format": "csv",
+  "generation_instructions": "Pharmaceutical production batches from Indian manufacturing plants."
+}

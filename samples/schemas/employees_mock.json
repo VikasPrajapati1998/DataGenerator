@@ -1,0 +1,17 @@
+{
+  "schema": {
+    "employee_id": "unique integer",
+    "name": "realistic full name",
+    "email": "valid email",
+    "age": "integer between 22 and 60",
+    "city": "Indian city",
+    "department": ["IT", "HR", "Finance", "Sales"],
+    "salary": "realistic salary based on department"
+  },
+  "total_records": 10000,
+  "output_format": "csv",
+  "generation_instructions": "Generate realistic Indian employee records.",
+  "model_provider": "mock",
+  "model_name": "mock-llm",
+  "seed": 42
+}

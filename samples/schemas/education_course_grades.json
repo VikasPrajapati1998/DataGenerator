@@ -1,0 +1,44 @@
+{
+  "schema": {
+    "entity": "course_grade",
+    "locale": "en_IN",
+    "fields": {
+      "grade_id": {"type": "integer", "unique": true, "generator": "sequence", "min": 1},
+      "roll_no": {"type": "string", "pattern": "(CSE|ECE|MEC|CIV|EEE|ITE)\\d{2}[A-Z]{2}\\d{6}"},
+      "course_code": {"type": "string", "pattern": "(CS|MA|PH|EE|ME|HS)\\d{3}"},
+      "semester": {"type": "integer", "min": 1, "max": 8},
+      "credits": {"type": "integer", "allowed_values": [2, 3, 4], "weights": [20, 45, 35]},
+      "grade": {"type": "string", "allowed_values": ["O", "A+", "A", "B+", "B", "C", "F"],
+                "weights": [8, 16, 24, 22, 16, 9, 5]},
+      "total_marks": {"type": "integer", "generator": "profile", "depends_on": "grade",
+                      "description": "marks out of 100, consistent with the letter grade",
+                      "profile": {"O": {"min": 90, "typical": 93, "max": 100},
+                                  "A+": {"min": 80, "typical": 84, "max": 89},
+                                  "A": {"min": 70, "typical": 74, "max": 79},
+                                  "B+": {"min": 60, "typical": 64, "max": 69},
+                                  "B": {"min": 50, "typical": 54, "max": 59},
+                                  "C": {"min": 40, "typical": 44, "max": 49},
+                                  "F": {"min": 5, "typical": 30, "max": 39}}},
+      "grade_points": {"type": "integer", "generator": "profile", "depends_on": "grade",
+                       "profile": {"O": {"min": 10, "typical": 10, "max": 10.5},
+                                   "A+": {"min": 9, "typical": 9, "max": 9.5},
+                                   "A": {"min": 8, "typical": 8, "max": 8.5},
+                                   "B+": {"min": 7, "typical": 7, "max": 7.5},
+                                   "B": {"min": 6, "typical": 6, "max": 6.5},
+                                   "C": {"min": 5, "typical": 5, "max": 5.5},
+                                   "F": {"min": 0, "typical": 0, "max": 0.5}}},
+      "exam_date": {"type": "date", "min": "2024-11-15", "max": "2025-06-15"},
+      "result_date": {"type": "date", "depends_on": "exam_date", "offset_days": [20, 60]},
+      "evaluator": {"type": "string", "generator": "faker", "faker_method": "name"}
+    },
+    "rules": [
+      {"name": "fail_means_no_points", "expression": "grade_points == 0 if grade == 'F' else grade_points >= 5",
+       "description": "A failing grade earns zero grade points."},
+      {"name": "results_after_exam", "expression": "result_date > exam_date",
+       "description": "Results are published after the exam."}
+    ]
+  },
+  "total_records": 10000,
+  "output_format": "csv",
+  "generation_instructions": "Semester course results for an Indian university (10-point grading scale)."
+}

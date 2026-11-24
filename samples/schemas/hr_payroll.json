@@ -1,0 +1,44 @@
+{
+  "schema": {
+    "entity": "payslip",
+    "locale": "en_IN",
+    "fields": {
+      "payslip_id": {"type": "integer", "unique": true, "generator": "sequence", "min": 1},
+      "employee_code": {"type": "string", "unique": true, "pattern": "EMP\\d{12}"},
+      "employee_name": {"type": "string", "generator": "faker", "faker_method": "name"},
+      "work_email": {"type": "string", "generator": "email", "unique": true},
+      "pan": {"type": "string", "pattern": "[A-Z]{3}P[A-Z]\\d{4}[A-Z]"},
+      "department": {"type": "string", "allowed_values": ["engineering", "sales", "operations", "finance", "hr", "support"],
+                     "weights": [34, 18, 16, 10, 7, 15]},
+      "grade": {"type": "string", "allowed_values": ["L1", "L2", "L3", "L4", "L5", "L6"], "weights": [28, 26, 20, 14, 8, 4]},
+      "monthly_basic_inr": {"type": "integer", "generator": "profile", "depends_on": "grade",
+                            "profile": {"L1": {"min": 12000, "typical": 16000, "max": 22000},
+                                        "L2": {"min": 20000, "typical": 27000, "max": 36000},
+                                        "L3": {"min": 34000, "typical": 45000, "max": 60000},
+                                        "L4": {"min": 58000, "typical": 75000, "max": 100000},
+                                        "L5": {"min": 95000, "typical": 125000, "max": 170000},
+                                        "L6": {"min": 160000, "typical": 220000, "max": 350000}}},
+      "hra_inr": {"type": "integer", "generator": "profile", "depends_on": "grade",
+                  "description": "house rent allowance, below the basic of the same grade",
+                  "profile": {"L1": {"min": 4000, "typical": 6400, "max": 8800},
+                              "L2": {"min": 8000, "typical": 10800, "max": 14400},
+                              "L3": {"min": 13600, "typical": 18000, "max": 24000},
+                              "L4": {"min": 23200, "typical": 30000, "max": 40000},
+                              "L5": {"min": 38000, "typical": 50000, "max": 68000},
+                              "L6": {"min": 64000, "typical": 88000, "max": 140000}}},
+      "pay_month": {"type": "string", "allowed_values": ["2025-06", "2025-07", "2025-08", "2025-09", "2025-10"]},
+      "joining_date": {"type": "date", "min": "2012-01-01", "max": "2025-05-31"},
+      "bank": {"type": "string", "allowed_values": ["HDFC Bank", "ICICI Bank", "SBI", "Axis Bank", "Kotak Mahindra Bank"],
+               "weights": [30, 24, 22, 14, 10]},
+      "work_city": {"type": "string", "generator": "geo_city"},
+      "pf_opted": {"type": "boolean", "allowed_values": [true, false], "weights": [88, 12]}
+    },
+    "rules": [
+      {"name": "hra_below_basic", "expression": "hra_inr < monthly_basic_inr",
+       "description": "House rent allowance is below the basic salary."}
+    ]
+  },
+  "total_records": 5000,
+  "output_format": "csv",
+  "generation_instructions": "Monthly payroll records of an Indian technology services company."
+}

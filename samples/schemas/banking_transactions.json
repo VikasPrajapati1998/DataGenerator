@@ -1,0 +1,42 @@
+{
+  "schema": {
+    "entity": "transaction",
+    "locale": "en_IN",
+    "fields": {
+      "txn_id": {"type": "string", "unique": true, "generator": "uuid"},
+      "account_no": {"type": "string", "pattern": "(5010|6012|3020|9180)\\d{8}"},
+      "ifsc": {"type": "string", "pattern": "(HDFC|ICIC|SBIN|UTIB|KKBK)0\\d{6}"},
+      "customer_name": {"type": "string", "generator": "faker", "faker_method": "name"},
+      "txn_type": {"type": "string", "allowed_values": ["UPI", "IMPS", "NEFT", "RTGS", "ATM", "POS", "CHEQUE"],
+                   "weights": [58, 9, 10, 1, 9, 11, 2]},
+      "direction": {"type": "string", "allowed_values": ["debit", "credit"], "weights": [64, 36]},
+      "amount_inr": {"type": "float", "generator": "profile", "depends_on": "txn_type", "decimals": 2,
+                     "profile": {
+                       "UPI": {"min": 1, "typical": 350, "max": 100000},
+                       "IMPS": {"min": 100, "typical": 5000, "max": 500000},
+                       "NEFT": {"min": 500, "typical": 25000, "max": 1000000},
+                       "RTGS": {"min": 200000, "typical": 450000, "max": 5000000},
+                       "ATM": {"min": 100, "typical": 3000, "max": 25000},
+                       "POS": {"min": 20, "typical": 1200, "max": 150000},
+                       "CHEQUE": {"min": 1000, "typical": 30000, "max": 2000000}}},
+      "merchant_category": {"type": "string", "nullable": true, "null_ratio": 0.3,
+                            "allowed_values": ["grocery", "fuel", "dining", "electronics", "travel", "utilities",
+                                               "healthcare", "education", "apparel"],
+                            "weights": [24, 12, 14, 7, 8, 14, 7, 5, 9]},
+      "channel": {"type": "string", "allowed_values": ["mobile_app", "net_banking", "branch", "atm", "card_terminal"],
+                  "weights": [62, 14, 4, 9, 11]},
+      "txn_time": {"type": "datetime", "min": "2025-01-01", "max": "2025-11-15"},
+      "status": {"type": "string", "allowed_values": ["success", "failed", "reversed"], "weights": [96, 3, 1]},
+      "balance_after_inr": {"type": "float", "min": 0, "max": 5000000, "decimals": 2,
+                            "distribution": {"kind": "lognormal", "mean": 11.0, "std": 1.2}},
+      "city": {"type": "string", "generator": "geo_city"}
+    },
+    "rules": [
+      {"name": "rtgs_minimum", "expression": "amount_inr >= 200000 if txn_type == 'RTGS' else True",
+       "description": "RTGS transfers are at least 2 lakh rupees."}
+    ]
+  },
+  "total_records": 10000,
+  "output_format": "csv",
+  "generation_instructions": "Retail bank account transactions in India."
+}

@@ -1,0 +1,35 @@
+{
+  "schema": {
+    "entity": "patient",
+    "locale": "en_IN",
+    "fields": {
+      "patient_id": {"type": "integer", "unique": true, "generator": "sequence", "min": 1},
+      "mrn": {"type": "string", "unique": true, "pattern": "MRN\\d{12}"},
+      "full_name": {"type": "string", "generator": "faker", "faker_method": "name"},
+      "email": {"type": "string", "generator": "email", "unique": true},
+      "phone": {"type": "string", "pattern": "[6-9]\\d{9}"},
+      "gender": {"type": "string", "allowed_values": ["male", "female"], "weights": [50, 50]},
+      "age": {"type": "integer", "min": 0, "max": 95, "distribution": {"kind": "normal", "mean": 38, "std": 20}},
+      "blood_group": {"type": "string", "allowed_values": ["O+", "B+", "A+", "AB+", "O-", "B-", "A-", "AB-"],
+                      "weights": [36, 32, 22, 7, 1.2, 0.8, 0.6, 0.4]},
+      "height_cm": {"type": "integer", "generator": "profile", "depends_on": "gender",
+                    "profile": {"male": {"min": 150, "typical": 167, "max": 192},
+                                "female": {"min": 140, "typical": 154, "max": 178}}},
+      "weight_kg": {"type": "float", "generator": "profile", "depends_on": "gender", "decimals": 1,
+                    "correlate_with": {"field": "height_cm", "strength": 0.55},
+                    "profile": {"male": {"min": 45, "typical": 68, "max": 115},
+                                "female": {"min": 38, "typical": 57, "max": 100}}},
+      "chronic_condition": {"type": "string", "allowed_values": ["none", "diabetes", "hypertension", "asthma", "thyroid"],
+                            "weights": [62, 13, 14, 5, 6]},
+      "insurance_provider": {"type": "string", "nullable": true, "null_ratio": 0.35,
+                             "allowed_values": ["Star Health", "HDFC ERGO", "ICICI Lombard", "Niva Bupa", "Care Health", "Ayushman Bharat"],
+                             "weights": [20, 15, 15, 12, 12, 26]},
+      "state": {"type": "string", "generator": "geo_state"},
+      "city": {"type": "string", "generator": "geo_city"},
+      "registered_on": {"type": "date", "min": "2018-01-01", "max": "2025-11-15"}
+    }
+  },
+  "total_records": 5000,
+  "output_format": "csv",
+  "generation_instructions": "Patients registered at a multi-speciality hospital network in India."
+}

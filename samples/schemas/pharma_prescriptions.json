@@ -1,0 +1,44 @@
+{
+  "schema": {
+    "entity": "prescription",
+    "locale": "en_IN",
+    "fields": {
+      "prescription_id": {"type": "integer", "unique": true, "generator": "sequence", "min": 900001},
+      "rx_no": {"type": "string", "unique": true, "pattern": "RX\\d{12}"},
+      "patient_name": {"type": "string", "generator": "faker", "faker_method": "name"},
+      "patient_age": {"type": "integer", "min": 1, "max": 92, "distribution": {"kind": "normal", "mean": 44, "std": 18}},
+      "gender": {"type": "string", "allowed_values": ["male", "female"], "weights": [51, 49]},
+      "doctor_name": {"type": "string", "generator": "faker", "faker_method": "name"},
+      "doctor_reg_no": {"type": "string", "pattern": "(MMC|DMC|KMC|TNMC)-\\d{5}"},
+      "city": {"type": "string", "generator": "geo_city"},
+      "treatment": {"type": "string",
+                    "description": "diagnosis and the drug prescribed for it",
+                    "allowed_values": ["fever | Paracetamol 650 mg", "type 2 diabetes | Metformin 500 mg",
+                                       "hypertension | Amlodipine 5 mg", "respiratory infection | Azithromycin 500 mg",
+                                       "acid reflux | Pantoprazole 40 mg", "allergic rhinitis | Cetirizine 10 mg",
+                                       "dyslipidemia | Atorvastatin 10 mg"],
+                    "weights": [22, 18, 18, 14, 10, 9, 9]},
+      "duration_days": {"type": "integer", "allowed_values": [3, 5, 7, 10, 14, 30, 90],
+                        "weights": [14, 22, 18, 10, 8, 18, 10]},
+      "refills": {"type": "integer", "allowed_values": [0, 1, 2, 3], "weights": [62, 22, 10, 6]},
+      "prescribed_on": {"type": "date", "min": "2025-01-01", "max": "2025-11-10"},
+      "dispensed_on": {"type": "date", "depends_on": "prescribed_on", "offset_days": [0, 3]},
+      "pharmacy_bill_inr": {"type": "float", "generator": "profile", "depends_on": "treatment", "decimals": 2,
+                            "profile": {
+                              "fever | Paracetamol 650 mg": {"min": 30, "typical": 90, "max": 400},
+                              "type 2 diabetes | Metformin 500 mg": {"min": 150, "typical": 650, "max": 3500},
+                              "hypertension | Amlodipine 5 mg": {"min": 120, "typical": 480, "max": 2500},
+                              "respiratory infection | Azithromycin 500 mg": {"min": 120, "typical": 380, "max": 1800},
+                              "acid reflux | Pantoprazole 40 mg": {"min": 60, "typical": 220, "max": 1200},
+                              "allergic rhinitis | Cetirizine 10 mg": {"min": 40, "typical": 160, "max": 900},
+                              "dyslipidemia | Atorvastatin 10 mg": {"min": 180, "typical": 700, "max": 3000}}}
+    },
+    "rules": [
+      {"name": "dispensed_after_prescribed", "expression": "dispensed_on >= prescribed_on",
+       "description": "Medicines are dispensed on or after the prescription date."}
+    ]
+  },
+  "total_records": 5000,
+  "output_format": "jsonl",
+  "generation_instructions": "Outpatient prescriptions dispensed by Indian retail pharmacies."
+}

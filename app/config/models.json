@@ -1,0 +1,77 @@
+{
+  "default": "ollama_local/qwen3:0.6b",
+  "models": [
+    {
+      "provider": "ollama_local", "model_name": "qwen3:0.6b", "model_id": "qwen3:0.6b",
+      "context_window": 40960, "max_output_tokens": 1536, "temperature": 0.8, "timeout": 120,
+      "thinking": true, "approx_memory_mb": 1100,
+      "notes": "Alibaba Qwen3 0.6B (Apache-2.0). Thinking mode is disabled for generation."
+    },
+    {
+      "provider": "ollama_local", "model_name": "qwen3.5:0.8b", "model_id": "qwen3.5:0.8b",
+      "context_window": 32768, "max_output_tokens": 1536, "thinking": true, "approx_memory_mb": 1600,
+      "notes": "Qwen3.5 0.8B."
+    },
+    {
+      "provider": "ollama_local", "model_name": "llama3.2:1b", "model_id": "llama3.2:1b",
+      "context_window": 32768, "max_output_tokens": 1536, "approx_memory_mb": 2000,
+      "notes": "Meta Llama 3.2 1B (Llama community licence)."
+    },
+    {
+      "provider": "ollama_local", "model_name": "gemma3:1b", "model_id": "gemma3:1b",
+      "context_window": 32768, "max_output_tokens": 1536, "approx_memory_mb": 1300,
+      "notes": "Google Gemma 3 1B (Gemma terms)."
+    },
+    {
+      "provider": "ollama_local", "model_name": "granite3.3:2b", "model_id": "granite3.3:2b",
+      "context_window": 32768, "max_output_tokens": 1536, "approx_memory_mb": 2300,
+      "notes": "IBM Granite 3.3 2B (Apache-2.0)."
+    },
+    {
+      "provider": "ollama_local", "model_name": "nemotron-3-nano:4b", "model_id": "nemotron-3-nano:4b",
+      "context_window": 32768, "max_output_tokens": 1536, "approx_memory_mb": 3500,
+      "notes": "NVIDIA Nemotron 3 Nano 4B from the Ollama library; run 'ollama pull nemotron-3-nano:4b' first."
+    },
+    {
+      "provider": "ollama_local", "model_name": "gpt-oss:120b-cloud", "model_id": "gpt-oss:120b-cloud",
+      "execution": "cloud", "structured_output": "json_mode", "context_window": 131072,
+      "max_output_tokens": 2048, "thinking": true, "requests_per_minute": 30,
+      "notes": "Ollama Cloud model proxied by the signed-in local server ('ollama signin'). Cloud models do not support schema-constrained output, so JSON mode plus validation is used."
+    },
+    {
+      "provider": "ollama_local", "model_name": "gemma4:31b-cloud", "model_id": "gemma4:31b-cloud",
+      "execution": "cloud", "structured_output": "json_mode", "context_window": 262144,
+      "max_output_tokens": 2048, "thinking": true, "requests_per_minute": 30,
+      "notes": "Google Gemma 4 31B on Ollama Cloud, proxied by the signed-in local server. JSON mode plus validation (no schema-constrained output on cloud)."
+    },
+    {
+      "provider": "ollama_local", "model_name": "beam:cloud", "model_id": "beam:cloud",
+      "execution": "cloud", "structured_output": "json_mode", "context_window": 1000000,
+      "max_output_tokens": 2048, "thinking": true, "requests_per_minute": 20,
+      "notes": "Reflection AI Beam 1.0 (501B MoE, 23B active, Apache-2.0), only offered by Ollama as a cloud tag. Run 'ollama pull beam:cloud' after 'ollama signin'."
+    },
+    {
+      "provider": "ollama_cloud", "model_name": "gpt-oss:120b", "model_id": "gpt-oss:120b",
+      "endpoint": "https://ollama.com", "auth_env": "OLLAMA_API_KEY", "execution": "cloud",
+      "structured_output": "json_mode", "context_window": 131072, "max_output_tokens": 2048,
+      "thinking": true, "requests_per_minute": 30,
+      "notes": "Direct Ollama Cloud API with Authorization: Bearer $OLLAMA_API_KEY."
+    },
+    {
+      "provider": "openrouter", "model_name": "reflection/beam-1.0-501b-a23b", "model_id": "reflection/beam-1.0-501b-a23b",
+      "execution": "cloud", "auth_env": "OPENROUTER_API_KEY", "structured_output": "json_mode",
+      "context_window": 1000000, "max_output_tokens": 2048, "requests_per_minute": 20,
+      "notes": "Reflection AI Beam 1.0 through OpenRouter (paid/free availability varies)."
+    },
+    {
+      "provider": "nvidia_nim", "model_name": "nemotron-super-49b", "model_id": "nvidia/llama-3.3-nemotron-super-49b-v1",
+      "execution": "cloud", "auth_env": "NVIDIA_API_KEY", "structured_output": "json_mode",
+      "context_window": 131072, "max_output_tokens": 2048, "requests_per_minute": 35,
+      "notes": "NVIDIA hosted API (build.nvidia.com, free developer tier with per-model RPM limits). Verify the id with 'python -m app.main models check'."
+    },
+    {
+      "provider": "mock", "model_name": "mock-llm", "model_id": "mock-llm", "temperature": 0.8,
+      "max_concurrency": 64, "notes": "Deterministic offline adapter for tests and dry runs."
+    }
+  ]
+}

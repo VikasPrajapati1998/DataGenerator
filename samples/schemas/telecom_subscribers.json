@@ -1,0 +1,33 @@
+{
+  "schema": {
+    "entity": "subscriber",
+    "locale": "en_IN",
+    "fields": {
+      "subscriber_id": {"type": "integer", "unique": true, "generator": "sequence", "min": 1},
+      "msisdn": {"type": "string", "unique": true, "pattern": "[6-9]\\d{9}"},
+      "subscriber_name": {"type": "string", "generator": "faker", "faker_method": "name"},
+      "plan_type": {"type": "string", "allowed_values": ["prepaid", "postpaid"], "weights": [82, 18]},
+      "network": {"type": "string", "allowed_values": ["4G", "5G"], "weights": [64, 36]},
+      "monthly_arpu_inr": {"type": "integer", "generator": "profile", "depends_on": "plan_type",
+                           "profile": {"prepaid": {"min": 99, "typical": 239, "max": 699},
+                                       "postpaid": {"min": 399, "typical": 699, "max": 2299}}},
+      "data_usage_gb": {"type": "float", "min": 0, "max": 150, "decimals": 2,
+                        "distribution": {"kind": "lognormal", "mean": 2.9, "std": 0.6}},
+      "voice_minutes": {"type": "integer", "min": 0, "max": 6000, "distribution": {"kind": "triangular", "mode": 650}},
+      "handset_brand": {"type": "string", "allowed_values": ["Samsung", "Xiaomi", "Vivo", "Oppo", "Realme", "Apple", "OnePlus", "Motorola"],
+                        "weights": [19, 17, 16, 10, 11, 7, 6, 6]},
+      "circle": {"type": "string", "generator": "geo_state"},
+      "activation_date": {"type": "date", "min": "2014-01-01", "max": "2025-07-31"},
+      "last_recharge_date": {"type": "date", "min": "2025-08-01", "max": "2025-11-15"},
+      "churn_risk": {"type": "string", "allowed_values": ["low", "medium", "high"], "weights": [68, 22, 10]},
+      "dnd_registered": {"type": "boolean", "allowed_values": [true, false], "weights": [28, 72]}
+    },
+    "rules": [
+      {"name": "recharge_after_activation", "expression": "last_recharge_date >= activation_date",
+       "description": "The last recharge is not before activation."}
+    ]
+  },
+  "total_records": 10000,
+  "output_format": "csv",
+  "generation_instructions": "Mobile subscribers of an Indian telecom operator."
+}

@@ -1,0 +1,46 @@
+{
+  "schema": {
+    "entity": "service_record",
+    "locale": "en_IN",
+    "fields": {
+      "service_id": {"type": "integer", "unique": true, "generator": "sequence", "min": 500001},
+      "job_card_no": {"type": "string", "unique": true, "pattern": "JC-\\d{4}-\\d{8}"},
+      "registration_no": {"type": "string", "pattern": "(MH|DL|KA|TN|GJ|UP|WB|TS)\\d{2}[A-Z]{2}\\d{4}"},
+      "previous_service_id": {"type": "integer", "generator": "reference", "reference": "service_id",
+                              "nullable": true, "null_ratio": 0.4},
+      "service_type": {"type": "string",
+                       "allowed_values": ["periodic", "repair", "accident", "tyre_battery", "warranty"],
+                       "weights": [55, 22, 7, 10, 6]},
+      "workshop_city": {"type": "string", "generator": "geo_city"},
+      "service_date": {"type": "date", "min": "2023-01-01", "max": "2025-11-15"},
+      "delivery_date": {"type": "date", "depends_on": "service_date", "offset_days": [0, 5]},
+      "odometer_km": {"type": "integer", "min": 1000, "max": 200000,
+                      "distribution": {"kind": "triangular", "mode": 38000}},
+      "labour_cost_inr": {"type": "integer", "generator": "profile", "depends_on": "service_type",
+                          "profile": {
+                            "periodic": {"min": 800, "typical": 2200, "max": 6000},
+                            "repair": {"min": 1500, "typical": 5500, "max": 25000},
+                            "accident": {"min": 5000, "typical": 18000, "max": 90000},
+                            "tyre_battery": {"min": 300, "typical": 900, "max": 3000},
+                            "warranty": {"min": 0, "typical": 500, "max": 4000}}},
+      "parts_cost_inr": {"type": "integer", "generator": "profile", "depends_on": "service_type",
+                         "profile": {
+                           "periodic": {"min": 1200, "typical": 3500, "max": 9000},
+                           "repair": {"min": 2000, "typical": 9000, "max": 60000},
+                           "accident": {"min": 8000, "typical": 45000, "max": 250000},
+                           "tyre_battery": {"min": 3500, "typical": 7000, "max": 28000},
+                           "warranty": {"min": 0, "typical": 0, "max": 15000}}},
+      "technician": {"type": "string", "generator": "faker", "faker_method": "name"},
+      "customer_rating": {"type": "integer", "allowed_values": [1, 2, 3, 4, 5], "weights": [3, 6, 14, 39, 38]},
+      "technician_notes": {"type": "string", "generator": "llm", "max_length": 220,
+                           "instructions": "One or two sentences of workshop notes that match the service type, odometer reading and costs."}
+    },
+    "rules": [
+      {"name": "delivered_after_service", "expression": "delivery_date >= service_date",
+       "description": "The vehicle is delivered on or after the service date."}
+    ]
+  },
+  "total_records": 1000,
+  "output_format": "csv",
+  "generation_instructions": "Authorised car service centre records in India. Notes should sound like real job-card remarks."
+}

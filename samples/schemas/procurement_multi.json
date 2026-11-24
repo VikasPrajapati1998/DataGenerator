@@ -1,0 +1,68 @@
+{
+  "generation_instructions": "Indian automotive parts procurement: suppliers, purchase orders, order lines and goods receipts.",
+  "schema": {
+    "tables": {
+      "suppliers": {
+        "records": 50,
+        "primary_key": ["supplier_id"],
+        "schema": {
+          "supplier_id": {"type": "integer", "generator": "sequence", "unique": true, "min": 1},
+          "supplier_name": {"type": "string", "generator": "faker", "faker_method": "company"},
+          "tier": {"type": "string", "allowed_values": ["strategic", "preferred", "approved"], "counts": [5, 15, null]},
+          "city": {"type": "string", "generator": "geo_city"}
+        }
+      },
+      "parts": {
+        "records": 40,
+        "primary_key": ["part_no"],
+        "schema": {
+          "part_no": {"type": "string", "generator": "regex", "pattern": "P-[0-9]{6}", "unique": true},
+          "part_name": {"type": "string", "allowed_values": ["Brake caliper LH", "Brake caliper RH", "Wiper motor", "Headlamp", "Fuel pump", "Clutch plate", "Radiator", "Alternator"]},
+          "unit_price": {"type": "float", "min": 50, "max": 9000, "decimals": 2}
+        }
+      },
+      "purchase_orders": {
+        "records": 400,
+        "primary_key": ["po_no"],
+        "links": {"supplier": {"table": "suppliers"}},
+        "schema": {
+          "po_no": {"type": "string", "generator": "regex", "pattern": "PO[0-9]{8}", "unique": true},
+          "supplier_id": {"link": "supplier", "column": "supplier_id"},
+          "supplier_tier": {"link": "supplier", "column": "tier"},
+          "po_type": {"type": "string", "allowed_values": ["legacy", "standard"], "counts": [60, null]},
+          "status": {"type": "string", "allowed_values": ["open", "closed", "cancelled"], "weights": [50, 40, 10], "exact": true},
+          "po_date": {"type": "date", "min": "2026-01-01", "max": "2026-10-31"},
+          "closed_date": {"type": "date", "depends_on": "po_date", "offset_days": [5, 60],
+                          "cases_by": "status", "cases": {"open": null, "cancelled": null}}
+        }
+      },
+      "po_lines": {
+        "per_parent": {"table": "purchase_orders", "min": 1, "max": 4, "where": {"status": ["open", "closed"]}},
+        "primary_key": ["po_no", "line_no"],
+        "links": {"part": {"table": "parts"}},
+        "schema": {
+          "po_no": {"link": "parent", "column": "po_no"},
+          "line_no": {"type": "integer", "generator": "child_index"},
+          "po_status": {"link": "parent", "column": "status", "hidden": true},
+          "part_no": {"link": "part", "column": "part_no"},
+          "unit_price": {"link": "part", "column": "unit_price"},
+          "ordered_qty": {"type": "integer", "min": 10, "max": 500},
+          "line_amount": {"type": "float", "formula": "ordered_qty * unit_price"}
+        }
+      },
+      "grn": {
+        "records": 300,
+        "primary_key": ["grn_no"],
+        "links": {"line": {"table": "po_lines", "mode": "unique", "where": {"po_status": "closed"}}},
+        "schema": {
+          "grn_no": {"type": "string", "generator": "regex", "pattern": "GRN[0-9]{8}", "unique": true},
+          "po_no": {"link": "line", "column": "po_no"},
+          "line_no": {"link": "line", "column": "line_no"},
+          "ordered_qty": {"link": "line", "column": "ordered_qty"},
+          "receipt_type": {"type": "string", "allowed_values": ["full", "split"], "counts": [null, 45]},
+          "received_qty": {"type": "integer", "formula": "ordered_qty if receipt_type == 'full' else int(ordered_qty * 0.6)"}
+        }
+      }
+    }
+  }
+}

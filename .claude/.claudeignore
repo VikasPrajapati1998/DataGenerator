@@ -1,0 +1,13 @@
+.venv/
+output/
+logs/
+**/__pycache__/
+*.pyc
+.pytest_cache/
+benchmarks/results/*.json
+samples/outputs/**/*.csv
+samples/outputs/**/*.jsonl
+samples/outputs/**/*.json
+*.sqlite
+*.npy
+.env

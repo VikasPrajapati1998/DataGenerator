@@ -1,0 +1,46 @@
+{
+  "schema": {
+    "entity": "order",
+    "locale": "en_US",
+    "fields": {
+      "order_id": {"type": "integer", "unique": true, "generator": "sequence", "min": 100001},
+      "order_code": {"type": "string", "unique": true, "pattern": "ORD-[A-Z]{3}-\\d{8}"},
+      "customer_name": {"type": "string", "generator": "faker", "faker_method": "name"},
+      "customer_email": {"type": "string", "generator": "email", "unique": true},
+      "state": {"type": "string", "generator": "geo_state"},
+      "city": {"type": "string", "generator": "geo_city"},
+      "channel": {"type": "string", "allowed_values": ["web", "mobile_app", "marketplace", "store"],
+                  "weights": [45, 30, 15, 10]},
+      "category": {"type": "string", "allowed_values": ["electronics", "home", "fashion", "grocery", "sports"],
+                   "weights": [25, 20, 25, 20, 10]},
+      "order_value": {"type": "float", "generator": "profile", "depends_on": "category", "decimals": 2,
+                      "profile": {
+                        "electronics": {"min": 25, "max": 2500, "typical": 220},
+                        "home": {"min": 10, "max": 1200, "typical": 85},
+                        "fashion": {"min": 8, "max": 600, "typical": 60},
+                        "grocery": {"min": 5, "max": 300, "typical": 45},
+                        "sports": {"min": 10, "max": 900, "typical": 75}}},
+      "items": {"type": "integer", "min": 1, "max": 12,
+                "distribution": {"kind": "lognormal", "mean": 0.6, "std": 0.6}},
+      "order_date": {"type": "date", "min": "2025-01-01", "max": "2025-12-31"},
+      "delivery_date": {"type": "date", "depends_on": "order_date", "offset_days": [1, 14]},
+      "repeat_of_order": {"type": "integer", "generator": "reference", "reference": "order_id",
+                          "nullable": true, "null_ratio": 0.7},
+      "gift": {"type": "boolean", "allowed_values": [true, false], "weights": [12, 88]},
+      "review": {"type": "string", "generator": "llm", "max_length": 280,
+                 "instructions": "One or two sentences of a customer review that fits the category, order value, delivery time and channel. Vary tone and sentiment."}
+    },
+    "rules": [
+      {"name": "delivery_after_order", "expression": "delivery_date > order_date",
+       "description": "Delivery happens after the order is placed."},
+      {"name": "bulk_orders_cost_more", "expression": "order_value >= 15 if items >= 6 else True",
+       "description": "Orders with six or more items are worth at least 15."}
+    ]
+  },
+  "total_records": 2000,
+  "output_format": "jsonl",
+  "generation_instructions": "US e-commerce orders for a mid-size online retailer in 2025.",
+  "fallback_models": ["ollama_local/llama3.2:1b"],
+  "work_stealing": true,
+  "quality_requirements": {"semantic_threshold": 0.95, "min_quality_score": 85}
+}
